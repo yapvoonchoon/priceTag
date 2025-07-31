@@ -5,24 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Price Tag Generator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
     }
     .tag {
-      width: 140px; /* approx 14mm */
-      height: 400px; /* approx 40mm */
+      width: 151px; /* approx 40mm */
+      height: 45px;  /* approx 12mm */
       border: 1px solid #000;
-      padding: 5px;
-      font-size: 14px;
+      padding: 2px;
+      font-size: 10px;
       box-sizing: border-box;
       page-break-inside: avoid;
+      position: relative;
+    }
+    .qr {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 35px;
+      height: 35px;
     }
     #tagContainer {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 5px;
       padding: 10px;
     }
   </style>
@@ -79,13 +88,21 @@
         const tag = document.createElement('div');
         tag.className = 'tag';
         tag.innerHTML = `
-          <strong>${code}</strong><br>
-          <span>${name}</span><br>
-          <span>${desc}</span><br>
-          <strong>${price}</strong>
+          <div><strong>${name}</strong></div>
+          <div>${desc}</div>
+          <div><strong>${price}</strong></div>
+          <div id="qr-${idx}" class="qr"></div>
         `;
 
         container.appendChild(tag);
+
+        // Generate QR
+        new QRCode(document.getElementById(`qr-${idx}`), {
+          text: code,
+          width: 35,
+          height: 35,
+          correctLevel: QRCode.CorrectLevel.L
+        });
       });
     }
   </script>
