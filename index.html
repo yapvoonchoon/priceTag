@@ -16,8 +16,8 @@
       background-color: #555;
     }
     .tag {
-      width: 151px;
-      height: 40mm;
+      width: 40mm;
+      height: 12mm;
       padding: 2px;
       font-size: 10px;
       box-sizing: border-box;
@@ -27,14 +27,14 @@
       background-color: white;
     }
     .qr-area {
-      width: 40px;
+      width: 12mm;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .qr {
-      width: 35px;
-      height: 35px;
+      width: 10mm;
+      height: 10mm;
     }
     .text-area {
       flex: 1;
@@ -149,16 +149,16 @@
         const qrImg = qr._el.querySelector('img');
         qrImg.onload = () => {
           const ctx = qrCanvas.getContext('2d');
-          qrCanvas.width = 70;
-          qrCanvas.height = 70;
-          ctx.drawImage(qrImg, 0, 0, 70, 70);
+          qrCanvas.width = 40;
+          qrCanvas.height = 40;
+          ctx.drawImage(qrImg, 0, 0, 40, 40);
         };
       });
     }
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [40, 151] });
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [40, 12] });
       const tags = document.querySelectorAll('.tag');
 
       for (let i = 0; i < tags.length; i++) {
@@ -166,8 +166,8 @@
         const canvas = await html2canvas(tag, { scale: 4 });
         const imgData = canvas.toDataURL('image/png');
 
-        if (i !== 0) pdf.addPage([40, 151], 'portrait');
-        pdf.addImage(imgData, 'PNG', 0, 0, 40, 151);
+        if (i !== 0) pdf.addPage([40, 12], 'landscape');
+        pdf.addImage(imgData, 'PNG', 0, 0, 40, 12);
       }
 
       pdf.save('price_tags.pdf');
