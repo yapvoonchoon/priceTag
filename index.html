@@ -49,7 +49,7 @@
         const headers = rawData[0].map(h => h?.trim());
         const rows = rawData.slice(1);
 
-        const data = rows.map(row => {
+        const structuredData = rows.map(row => {
           const obj = {};
           headers.forEach((header, i) => {
             obj[header] = row[i];
@@ -57,7 +57,7 @@
           return obj;
         });
 
-        displayTags(data);
+        displayTags(structuredData);
       };
 
       reader.readAsArrayBuffer(file);
@@ -67,7 +67,12 @@
       const container = document.getElementById('tagContainer');
       container.innerHTML = '';
 
-      data.forEach(row => {
+      if (!data || !Array.isArray(data)) {
+        console.error("No data found or data is not array");
+        return;
+      }
+
+      data.forEach((row, idx) => {
         const code = row["Item Code (O)"] || '';
         const name = row["Item Name (R)"] || '';
         const desc = row["Item Description (O)"] || '';
