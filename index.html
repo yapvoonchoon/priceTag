@@ -1,64 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Price Tag Generator</title>
-  <meta charset="UTF-8" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial; text-align: center; margin: 20px; }
-    input { margin: 10px; }
-    .tag {
-      width: 140px;  /* 14mm */
-      height: 400px; /* 40mm */
-      border: 1px solid #000;
-      margin: 10px auto;
-      page-break-after: always;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
     }
-    .tag-content {
-      padding: 10px;
+    .tag {
+      width: 140px; /* approx 14mm */
+      height: 400px; /* approx 40mm */
+      border: 1px solid #000;
+      padding: 5px;
       font-size: 14px;
+      box-sizing: border-box;
+      page-break-inside: avoid;
+    }
+    #tagContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
-  <h2>Excel to Price Tag Viewer</h2>
-  <input type="file" id="excelFile" accept=".xlsx, .xls" />
-  <div id="tagsContainer"></div>
+  <h2>Upload Excel File</h2>
+  <input type="file" id="excelFile" accept=".xlsx, .xls">
+  <div id="tagContainer"></div>
 
   <script>
-    document.getElementById('excelFile').addEventListener('change', function (e) {
-      const file = e.target.files[0];
+    document.getElementById('excelFile').addEventListener('change', handleFile, false);
+
+    function handleFile(event) {
+      const file = event.target.files[0];
       const reader = new FileReader();
 
       reader.onload = function (e) {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(sheet);
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
-        const container = document.getElementById('tagsContainer');
-        container.innerHTML = '';
-
-        json.forEach((row, i) => {
-          const tag = document.createElement('div');
-          tag.className = 'tag';
-
-          tag.innerHTML = `
-            <div class="tag-content">
-              <strong>Item Code:</strong> ${row['Item Code'] || ''}<br />
-              <strong>Item Name:</strong> ${row['Item Name'] || ''}<br />
-              <strong>Description:</strong> ${row['Item Description'] || ''}<br />
-              <strong>Price:</strong> RM ${row['Sell Price'] || ''}<br />
-            </div>
-          `;
-
-          container.appendChild(tag);
-        });
+        displayTags(jsonData);
       };
 
       reader.readAsArrayBuffer(file);
-    });
+    }
+
+    function displayTags(data) {
+      const container = document.getElementById('tagContainer');
+      container.innerHTML = '';
+
+      data.forEach(row => {
+        const code = row["Item Code (O)"] || '';
+        const name = row["Item Name (R)"] || '';
+        const desc = row["Item Description (O)"] || '';
+        const price = row["Sell Price (R)"] != null ? `RM ${row["Sell Price (R)"]}` : '';
+
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `
+          <strong>${code}</strong><br>
+          <span>${name}</span><br>
+          <span>${desc}</span><br>
+          <strong>${price}</strong>
+        `;
+
+        container.appendChild(tag);
+      });
+    }
   </script>
 </body>
 </html>
