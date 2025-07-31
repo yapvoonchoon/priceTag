@@ -43,9 +43,21 @@
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
-        displayTags(jsonData);
+        // Convert to JSON with header normalization
+        const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        const headers = rawData[0].map(h => h?.trim());
+        const rows = rawData.slice(1);
+
+        const data = rows.map(row => {
+          const obj = {};
+          headers.forEach((header, i) => {
+            obj[header] = row[i];
+          });
+          return obj;
+        });
+
+        displayTags(data);
       };
 
       reader.readAsArrayBuffer(file);
