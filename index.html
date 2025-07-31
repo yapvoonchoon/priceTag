@@ -37,27 +37,25 @@
 
     function handleFile(event) {
       const file = event.target.files[0];
+      if (!file) {
+        alert("No file selected.");
+        return;
+      }
       const reader = new FileReader();
 
       reader.onload = function (e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
 
-        // Convert to JSON with header normalization
-        const rawData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-        const headers = rawData[0].map(h => h?.trim());
-        const rows = rawData.slice(1);
-
-        const structuredData = rows.map(row => {
-          const obj = {};
-          headers.forEach((header, i) => {
-            obj[header] = row[i];
-          });
-          return obj;
-        });
-
-        displayTags(structuredData);
+          console.log("Parsed data:", json);
+          displayTags(json);
+        } catch (err) {
+          console.error("Error reading Excel file:", err);
+          alert("Failed to read Excel file. Check the format.");
+        }
       };
 
       reader.readAsArrayBuffer(file);
@@ -68,7 +66,7 @@
       container.innerHTML = '';
 
       if (!data || !Array.isArray(data)) {
-        console.error("No data found or data is not array");
+        console.error("Invalid data format");
         return;
       }
 
@@ -76,7 +74,7 @@
         const code = row["Item Code (O)"] || '';
         const name = row["Item Name (R)"] || '';
         const desc = row["Item Description (O)"] || '';
-        const price = row["Sell Price (R)"] != null ? `RM ${row["Sell Price (R)"]}` : '';
+        const price = row["Sell Price (R)"] !== undefined ? `RM ${row["Sell Price (R)"]}` : '';
 
         const tag = document.createElement('div');
         tag.className = 'tag';
