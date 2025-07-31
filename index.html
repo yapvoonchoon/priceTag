@@ -1,16 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
   <title>Price Tag Generator</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial; text-align: center; margin: 20px; }
+    input { margin: 10px; }
+    .tag {
+      width: 140px;  /* 14mm */
+      height: 400px; /* 40mm */
+      border: 1px solid #000;
+      margin: 10px auto;
+      page-break-after: always;
+    }
+    .tag-content {
+      padding: 10px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Upload Excel File</h1>
+  <h2>Excel to Price Tag Viewer</h2>
   <input type="file" id="excelFile" accept=".xlsx, .xls" />
-  <div id="layoutArea">[Layout builder here]</div>
-  <button id="generateBtn">Generate PDF</button>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="app.js"></script>
+  <div id="tagsContainer"></div>
+
+  <script>
+    document.getElementById('excelFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet);
+
+        const container = document.getElementById('tagsContainer');
+        container.innerHTML = '';
+
+        json.forEach((row, i) => {
+          const tag = document.createElement('div');
+          tag.className = 'tag';
+
+          tag.innerHTML = `
+            <div class="tag-content">
+              <strong>Item Code:</strong> ${row['Item Code'] || ''}<br />
+              <strong>Item Name:</strong> ${row['Item Name'] || ''}<br />
+              <strong>Description:</strong> ${row['Item Description'] || ''}<br />
+              <strong>Price:</strong> RM ${row['Sell Price'] || ''}<br />
+            </div>
+          `;
+
+          container.appendChild(tag);
+        });
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  </script>
 </body>
 </html>
