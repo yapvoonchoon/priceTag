@@ -13,17 +13,18 @@
     body {
       font-family: 'Yomogi', cursive;
       margin: 20px;
+      background-color: #555;
     }
     .tag {
-      width: 151px; /* approx 40mm */
-      height: 45px;  /* approx 12mm */
-      border: 1px solid #000;
+      width: 151px;
+      height: 40mm;
       padding: 2px;
       font-size: 10px;
       box-sizing: border-box;
       page-break-inside: avoid;
       display: flex;
       flex-direction: row;
+      background-color: white;
     }
     .qr-area {
       width: 40px;
@@ -54,7 +55,7 @@
     }
     .item-price {
       font-family: Arial, sans-serif;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: bold;
     }
     #tagContainer {
@@ -126,7 +127,7 @@
         tag.className = 'tag';
         tag.innerHTML = `
           <div class="qr-area">
-            <div id="qr-${idx}" class="qr"></div>
+            <canvas id="qr-${idx}" class="qr"></canvas>
           </div>
           <div class="text-area">
             <div class="item-desc">${desc}</div>
@@ -137,18 +138,27 @@
 
         container.appendChild(tag);
 
-        new QRCode(document.getElementById(`qr-${idx}`), {
+        const qrCanvas = document.getElementById(`qr-${idx}`);
+        const qr = new QRCode(document.createElement('div'), {
           text: code,
-          width: 35,
-          height: 35,
+          width: 400,
+          height: 400,
           correctLevel: QRCode.CorrectLevel.L
         });
+
+        const qrImg = qr._el.querySelector('img');
+        qrImg.onload = () => {
+          const ctx = qrCanvas.getContext('2d');
+          qrCanvas.width = 70;
+          qrCanvas.height = 70;
+          ctx.drawImage(qrImg, 0, 0, 70, 70);
+        };
       });
     }
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [40, 12] });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [40, 151] });
       const tags = document.querySelectorAll('.tag');
 
       for (let i = 0; i < tags.length; i++) {
@@ -156,8 +166,8 @@
         const canvas = await html2canvas(tag, { scale: 4 });
         const imgData = canvas.toDataURL('image/png');
 
-        if (i !== 0) pdf.addPage([40, 12], 'portrait');
-        pdf.addImage(imgData, 'PNG', 0, 0, 40, 12);
+        if (i !== 0) pdf.addPage([40, 151], 'portrait');
+        pdf.addImage(imgData, 'PNG', 0, 0, 40, 151);
       }
 
       pdf.save('price_tags.pdf');
