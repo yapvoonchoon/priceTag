@@ -131,7 +131,6 @@
     <label for="fileInput" id="fileLabel">Choose file</label>
     <input type="file" id="fileInput" accept=".xlsx, .xls" />
     <button onclick="downloadPDF()">Download PDF</button>
-    <button onclick="saveAsPDF()">Save As</button>
   </div>
   <div id="tag-container"></div>
 
@@ -212,22 +211,6 @@
       }
 
       pdf.save("tags.pdf");
-    }
-
-    async function saveAsPDF() {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: "mm", format: [40, 12], orientation: "landscape" });
-      const tags = document.querySelectorAll(".tag");
-
-      for (let i = 0; i < tags.length; i++) {
-        const canvas = await html2canvas(tags[i], { scale: 2 });
-        const imgData = canvas.toDataURL("image/png");
-        if (i > 0) pdf.addPage([40, 12], 'landscape');
-        pdf.addImage(imgData, "PNG", 0, 0, 40, 12);
-        await new Promise(resolve => requestAnimationFrame(resolve));
-      }
-
-      pdf.output('save', 'tags.pdf');
     }
   </script>
 </body>
