@@ -31,12 +31,12 @@
       flex-direction: row;
       overflow: hidden;
       box-sizing: border-box;
-      padding: 2mm;
+      padding: 1mm;
     }
 
     .qr-container {
       width: 12mm;
-      height: 100%;
+      height: 12mm;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -72,8 +72,8 @@
     }
 
     canvas {
-      width: 10mm !important;
-      height: 10mm !important;
+      width: 9mm !important;
+      height: 9mm !important;
     }
   </style>
 </head>
@@ -93,9 +93,9 @@
       qrDiv.appendChild(qrCanvas);
       new QRCode(qrCanvas, {
         text: itemCode,
-        width: 128,
-        height: 128,
-        correctLevel: QRCode.CorrectLevel.H
+        width: 64,
+        height: 64,
+        correctLevel: QRCode.CorrectLevel.L
       });
 
       const info = document.createElement('div');
