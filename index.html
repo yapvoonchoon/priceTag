@@ -92,7 +92,7 @@
     }
     .description {
       font-family: 'Yomogi', sans-serif;
-      font-size: 34px; /* default font size */
+      font-size: 34px;
       font-weight: bold;
       margin-top: 0px;    
       margin-bottom: 0px; 
@@ -156,7 +156,12 @@
       container.innerHTML = "";
       for (let row of rows) {
         const itemCode = row["Item Code (O)"] || "";
-        const description = row["Item Description (O)"] || "";
+        const variantSKU = row["Variant SKU (O)"] || "";
+        const qrValue = variantSKU.trim() !== "" ? variantSKU : itemCode;
+
+        let description = row["Item Description (O)"] || "";
+        if (description.includes(" - ")) description = "";
+
         const itemName = row["Item Name (R)"] || "";
         const price = row["Sell Price (R)"] || "";
 
@@ -166,7 +171,7 @@
         const qrCanvas = document.createElement("canvas");
         new QRious({
           element: qrCanvas,
-          value: itemCode,
+          value: qrValue,
           size: 140,
           level: 'H'
         });
