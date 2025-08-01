@@ -72,8 +72,8 @@
     }
 
     canvas {
-      width: 9mm !important;
-      height: 9mm !important;
+      width: 8mm !important;
+      height: 8mm !important;
     }
   </style>
 </head>
@@ -93,8 +93,8 @@
       qrDiv.appendChild(qrCanvas);
       new QRCode(qrCanvas, {
         text: itemCode,
-        width: 64,
-        height: 64,
+        width: 32,
+        height: 32,
         correctLevel: QRCode.CorrectLevel.L
       });
 
@@ -156,7 +156,7 @@
         filename: 'tags.pdf',
         image: { type: 'jpeg', quality: 1 },
         html2canvas: {
-          scale: 4,
+          scale: 6,
           useCORS: true,
           allowTaint: true
         },
