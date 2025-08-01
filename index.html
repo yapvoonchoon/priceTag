@@ -8,14 +8,57 @@
   <style>
     body {
       font-family: 'Yomogi', sans-serif;
-      background-color: #999;
+      background-color: #e6f0e6; /* desaturated light grey-green */
       margin: 0;
       padding: 1rem;
+    }
+    #controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    label[for="fileInput"] {
+      display: inline-block;
+      padding: 12px 20px;
+      font-size: 18px;
+      font-family: Arial, sans-serif;
+      border: none;
+      border-radius: 8px;
+      background-color: #1e90ff; /* darker blue */
+      color: white;
+      cursor: pointer;
+      width: 280px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    label[for="fileInput"]:hover {
+      background-color: #1c86ee;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 18px;
+      font-family: Arial, sans-serif;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      width: 240px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background-color: #45a049;
     }
     #tag-container {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      justify-content: center;
     }
     .tag {
       width: 378px;
@@ -64,16 +107,22 @@
       margin-bottom: 8px; 
     }
     @media (max-width: 600px) {
+      #controls {
+        width: 100%;
+      }
       .tag {
-        transform: scale(0.9);
+        transform: scale(0.95);
         transform-origin: top left;
       }
     }
   </style>
 </head>
 <body>
-  <input type="file" id="fileInput" accept=".xlsx, .xls" />
-  <button onclick="downloadPDF()">Download PDF</button>
+  <div id="controls">
+    <label for="fileInput" id="fileLabel">Choose file</label>
+    <input type="file" id="fileInput" accept=".xlsx, .xls" />
+    <button onclick="downloadPDF()">Download PDF</button>
+  </div>
   <div id="tag-container"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -82,11 +131,13 @@
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script>
     const fileInput = document.getElementById("fileInput");
+    const fileLabel = document.getElementById("fileLabel");
     const container = document.getElementById("tag-container");
 
     fileInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
+      fileLabel.textContent = file.name;
 
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
@@ -104,7 +155,7 @@
         tag.className = "tag";
 
         const qrCanvas = document.createElement("canvas");
-        const qr = new QRious({
+        new QRious({
           element: qrCanvas,
           value: itemCode,
           size: 140,
