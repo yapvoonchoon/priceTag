@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: 'Yomogi', sans-serif;
-      background-color: #e6f0e6;
+      background-color: #e6f0e6; /* desaturated light grey-green */
       margin: 0;
       padding: 1rem;
     }
@@ -26,7 +26,7 @@
       font-family: Arial, sans-serif;
       border: none;
       border-radius: 8px;
-      background-color: #1e90ff;
+      background-color: #1e90ff; /* darker blue */
       color: white;
       cursor: pointer;
       width: 280px;
@@ -71,6 +71,9 @@
       flex-direction: row;
       align-items: center;
       justify-content: flex-start;
+      margin-top: 0px;    
+      margin-bottom: 0px; 
+      
     }
     .qr {
       width: 110px;
@@ -83,22 +86,38 @@
       flex-direction: column;
       justify-content: center;
       text-align: center;
+      max-width: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .description {
       font-family: 'Yomogi', sans-serif;
-      font-size: 38px;
+      font-size: clamp(24px, 5vw, 38px);
       font-weight: bold;
-      margin: 0;
+      margin-top: 0px;    
+      margin-bottom: 0px; 
+      max-width: 300px;
+      white-space: nowrap;
+      letter-spacing: -3px;
     }
-    .name, .price {
+
+    .name {
       font-family: Arial, sans-serif;
       font-size: 27px;
-      margin: 0;
+      margin-top: -5px; 
+      margin-bottom: 5px; 
     }
     .price {
+      font-family: Arial, sans-serif;
+      font-size: 27px;
       font-weight: bold;
+      margin-bottom: 8px; 
     }
     @media (max-width: 600px) {
+      #controls {
+        width: 100%;
+      }
       .tag {
         transform: scale(0.95);
         transform-origin: top left;
@@ -147,7 +166,7 @@
         new QRious({
           element: qrCanvas,
           value: itemCode,
-          size: 110,
+          size: 140,
           level: 'H'
         });
         qrCanvas.className = "qr";
@@ -176,6 +195,7 @@
         const imgData = canvas.toDataURL("image/png");
         if (i > 0) pdf.addPage([40, 12], 'landscape');
         pdf.addImage(imgData, "PNG", 0, 0, 40, 12);
+        await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
       pdf.save("tags.pdf");
