@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: 'Yomogi', sans-serif;
-      background-color: #e6f0e6; /* desaturated light grey-green */
+      background-color: #e6f0e6;
       margin: 0;
       padding: 1rem;
     }
@@ -26,7 +26,7 @@
       font-family: Arial, sans-serif;
       border: none;
       border-radius: 8px;
-      background-color: #1e90ff; /* darker blue */
+      background-color: #1e90ff;
       color: white;
       cursor: pointer;
       width: 280px;
@@ -71,8 +71,6 @@
       flex-direction: row;
       align-items: center;
       justify-content: flex-start;
-      margin-top: 0px;    
-      margin-bottom: 0px; 
     }
     .qr {
       width: 110px;
@@ -89,27 +87,18 @@
     .description {
       font-family: 'Yomogi', sans-serif;
       font-size: 38px;
-      font-weight: normal;
       font-weight: bold;
-      margin-top: 0px;    
-      margin-bottom: 0px; 
+      margin: 0;
     }
-    .name {
+    .name, .price {
       font-family: Arial, sans-serif;
       font-size: 27px;
-      margin-top: -5px; 
-      margin-bottom: 5px; 
+      margin: 0;
     }
     .price {
-      font-family: Arial, sans-serif;
-      font-size: 27px;
       font-weight: bold;
-      margin-bottom: 8px; 
     }
     @media (max-width: 600px) {
-      #controls {
-        width: 100%;
-      }
       .tag {
         transform: scale(0.95);
         transform-origin: top left;
@@ -158,7 +147,7 @@
         new QRious({
           element: qrCanvas,
           value: itemCode,
-          size: 140,
+          size: 110,
           level: 'H'
         });
         qrCanvas.className = "qr";
@@ -187,7 +176,6 @@
         const imgData = canvas.toDataURL("image/png");
         if (i > 0) pdf.addPage([40, 12], 'landscape');
         pdf.addImage(imgData, "PNG", 0, 0, 40, 12);
-        await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
       pdf.save("tags.pdf");
