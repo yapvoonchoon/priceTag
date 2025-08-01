@@ -4,170 +4,133 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Price Tag Generator</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Yomogi&display=swap" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Yomogi&display=swap');
-
     body {
-      font-family: 'Yomogi', cursive;
+      font-family: 'Yomogi', sans-serif;
       background-color: #999;
+      margin: 0;
+      padding: 1rem;
     }
-
     #tag-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
-      padding: 20px;
+      gap: 10px;
     }
-
     .tag {
-      width: 40mm;
-      height: 12mm;
+      width: 378px;
+      height: 113px;
       background: white;
+      padding: 4px;
+      box-sizing: border-box;
       position: relative;
       display: flex;
       flex-direction: row;
-      overflow: hidden;
-      box-sizing: border-box;
-      padding: 1mm;
-    }
-
-    .qr-container {
-      width: 12mm;
-      height: 12mm;
-      display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
     }
-
-    .info-container {
+    .qr {
+      width: 35px;
+      height: 35px;
+      margin-right: 8px;
+    }
+    .text {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
       text-align: center;
-      overflow: hidden;
     }
-
     .description {
-      font-family: 'Yomogi', cursive;
-      font-size: 11px;
-      line-height: 1;
+      font-size: 14px;
+      font-weight: normal;
     }
-
     .name {
       font-family: Arial, sans-serif;
-      font-size: 8px;
-      line-height: 1;
+      font-size: 11px;
     }
-
     .price {
       font-family: Arial, sans-serif;
       font-size: 12px;
       font-weight: bold;
-      line-height: 1;
     }
-
-    canvas {
-      width: 8mm !important;
-      height: 8mm !important;
+    @media (max-width: 600px) {
+      .tag {
+        transform: scale(0.9);
+        transform-origin: top left;
+      }
     }
   </style>
 </head>
 <body>
-  <input type="file" id="excelFile" accept=".xlsx, .xls" />
+  <input type="file" id="fileInput" accept=".xlsx, .xls" />
   <button onclick="downloadPDF()">Download PDF</button>
   <div id="tag-container"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script>
-    function createTag(itemCode, description, name, price) {
-      const tag = document.createElement('div');
-      tag.className = 'tag';
+    const fileInput = document.getElementById("fileInput");
+    const container = document.getElementById("tag-container");
 
-      const qrDiv = document.createElement('div');
-      qrDiv.className = 'qr-container';
-      const qrCanvas = document.createElement('div');
-      qrDiv.appendChild(qrCanvas);
-      new QRCode(qrCanvas, {
-        text: itemCode,
-        width: 32,
-        height: 32,
-        correctLevel: QRCode.CorrectLevel.L
-      });
-
-      const info = document.createElement('div');
-      info.className = 'info-container';
-
-      const descElem = document.createElement('div');
-      descElem.className = 'description';
-      descElem.textContent = description;
-      info.appendChild(descElem);
-
-      const nameElem = document.createElement('div');
-      nameElem.className = 'name';
-      nameElem.textContent = name;
-      info.appendChild(nameElem);
-
-      const priceElem = document.createElement('div');
-      priceElem.className = 'price';
-      priceElem.textContent = price;
-      info.appendChild(priceElem);
-
-      tag.appendChild(qrDiv);
-      tag.appendChild(info);
-
-      return tag;
-    }
-
-    document.getElementById('excelFile').addEventListener('change', function(e) {
+    fileInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const data = new Uint8Array(event.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sheet);
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
 
-        const container = document.getElementById('tag-container');
-        container.innerHTML = '';
+      container.innerHTML = "";
+      for (let row of rows) {
+        const itemCode = row["Item Code (O)"] || "";
+        const description = row["Item Description (O)"] || "";
+        const itemName = row["Item Name (R)"] || "";
+        const price = row["Sell Price (R)"] || "";
 
-        json.forEach(row => {
-          const tag = createTag(
-            row['Item Code (O)'],
-            row['Item Description (O)'],
-            row['Item Name (R)'],
-            `RM ${row['Sell Price (R)']}`
-          );
-          container.appendChild(tag);
+        const tag = document.createElement("div");
+        tag.className = "tag";
+
+        const qrCanvas = document.createElement("canvas");
+        const qr = new QRious({
+          element: qrCanvas,
+          value: itemCode,
+          size: 140,
+          level: 'H'
         });
-      };
-      reader.readAsArrayBuffer(file);
+        qrCanvas.className = "qr";
+
+        const textDiv = document.createElement("div");
+        textDiv.className = "text";
+        textDiv.innerHTML = `
+          <div class="description">${description}</div>
+          <div class="name">${itemName}</div>
+          <div class="price">RM ${price}</div>
+        `;
+
+        tag.appendChild(qrCanvas);
+        tag.appendChild(textDiv);
+        container.appendChild(tag);
+      }
     });
 
-    function downloadPDF() {
-      const element = document.getElementById('tag-container');
-      const opt = {
-        margin: 0,
-        filename: 'tags.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: {
-          scale: 6,
-          useCORS: true,
-          allowTaint: true
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: [40, 12],
-          orientation: 'landscape'
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-      html2pdf().set(opt).from(element).save();
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: "mm", format: [40, 12], orientation: "landscape" });
+      const tags = document.querySelectorAll(".tag");
+
+      for (let i = 0; i < tags.length; i++) {
+        const canvas = await html2canvas(tags[i], { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+        if (i > 0) pdf.addPage([40, 12], 'landscape');
+        pdf.addImage(imgData, "PNG", 0, 0, 40, 12);
+        await new Promise(resolve => requestAnimationFrame(resolve));
+      }
+
+      pdf.save("tags.pdf");
     }
   </script>
 </body>
