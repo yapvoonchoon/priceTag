@@ -131,7 +131,7 @@
     <label for="fileInput" id="fileLabel">Choose file</label>
     <input type="file" id="fileInput" accept=".xlsx, .xls" />
     <button onclick="downloadPDF()">Download PDF</button>
-    <button onclick="saveToGDrive()">Save to GDrive</button>
+    <button onclick="saveAsPDF()">Save As</button>
   </div>
   <div id="tag-container"></div>
 
@@ -214,7 +214,7 @@
       pdf.save("tags.pdf");
     }
 
-    async function saveToGDrive() {
+    async function saveAsPDF() {
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ unit: "mm", format: [40, 12], orientation: "landscape" });
       const tags = document.querySelectorAll(".tag");
@@ -227,15 +227,7 @@
         await new Promise(resolve => requestAnimationFrame(resolve));
       }
 
-      const blob = pdf.output("blob");
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "tags.pdf";
-      a.click();
-      URL.revokeObjectURL(url);
-
-      alert("To save this file to Google Drive, upload it manually via your Google Drive interface or use Google Picker API in an authenticated app.");
+      pdf.output('save', 'tags.pdf');
     }
   </script>
 </body>
